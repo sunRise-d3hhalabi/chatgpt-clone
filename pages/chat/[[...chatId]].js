@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 import { Message } from "components/Message";
 import { useRouter } from "next/router";
 
-export default function ChatPage() {
+export default function ChatPage({ chatId }) {
   const [messageText, setMessageText] = useState("");
   const [incomingMessage, setIncomingMessage] = useState("");
   const [newChatMessages, setNewChatMessages] = useState([]);
@@ -20,7 +20,7 @@ export default function ChatPage() {
       setNewChatId(null);
       router.push(`/chat/${newChatId}`);
     }
-  }, [newChatId, generatingResponse]);
+  }, [newChatId, generatingResponse, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +72,7 @@ export default function ChatPage() {
         <title>New chat</title>
       </Head>
       <div className="grid h-screen grid-cols-[260px_1fr]">
-        <ChatSidebar />
+        <ChatSidebar chatId={chatId} />
         <div className="flex flex-col overflow-hidden bg-gray-700">
           <div className="flex flex-1 flex-col-reverse overflow-scroll text-white">
             {newChatMessages.map((message) => (
