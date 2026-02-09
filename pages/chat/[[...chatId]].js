@@ -64,8 +64,6 @@ export default function ChatPage() {
             {!!incomingMessage && (
               <Message role="assistant" content={incomingMessage} />
             )}
-
-            {incomingMessage}
           </div>
           <footer className="bg-gray-800 p-10">
             <form onSubmit={handleSubmit}>
