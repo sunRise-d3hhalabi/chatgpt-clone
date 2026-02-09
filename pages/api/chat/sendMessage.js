@@ -5,6 +5,7 @@ export const config = {
 };
 
 export default async function handler(req) {
+  console.log("send msg");
   try {
     const { message } = await req.json();
 
@@ -43,11 +44,32 @@ export default async function handler(req) {
           model: "gpt-4.1-nano",
           messages: [initialChatMessage, { content: message, role: "user" }],
           stream: true,
-          temperature: 0.7,
+          temperature: 0.0,
         }),
       },
       {
-        onAfterStream: async (fullContent) => {},
+        onBeforeStream: ({ emit }) => {
+          if (chatId) {
+            emit(chatId, "newChatId");
+          }
+        },
+        onAfterStream: async ({ fullContent }) => {
+          await fetch(
+            `${req.headers.get("origin")}/api/chat/addMessageToChat`,
+            {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                cookie: req.headers.get("cookie"),
+              },
+              body: JSON.stringify({
+                chatId,
+                role: "assistant",
+                content: fullContent,
+              }),
+            }
+          );
+        },
       }
     );
 
@@ -56,28 +78,3 @@ export default async function handler(req) {
     console.log("AN ERROR OCCURRED IN SENDMESSAGE: ", e);
   }
 }
-
-// export default async function handler(req) {
-//   try {
-//     const { message } = await req.json();
-//     const stream = await OpenAIEdgeStream(
-//       "https://api.openai.com/v1/chat/completions",
-//       {
-//         headers: {
-//           "content-type": "application/json",
-//           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-//         },
-//         method: "POST",
-//         body: JSON.stringify({
-//           model: "gpt-3.5-turbo",
-//           messages: [{ content: message, role: "user" }],
-//           stream: true,
-//         }),
-//       }
-//     );
-
-//     return new Response(stream);
-//   } catch (e) {
-//     console.log("AN ERROR OCCURRED IN SENDMESSAGE: ", e);
-//   }
-// }

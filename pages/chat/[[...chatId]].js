@@ -13,7 +13,7 @@ export default function ChatPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Message text: ", messageText);
+    // console.log("Message text: ", messageText);
     setGeneratingResponse(true);
     setNewChatMessages((prev) => {
       const newChatMessages = [
@@ -44,7 +44,7 @@ export default function ChatPage() {
 
     const reader = data.getReader();
     await streamReader(reader, (message) => {
-      console.log("MESSAGE: ", message);
+      // console.log("MESSAGE: ", message);
       setIncomingMessage((s) => `${s}${message.content}`);
     });
 
