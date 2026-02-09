@@ -6,6 +6,8 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ObjectId } from "mongodb";
+import { v4 as uuid } from "uuid";
 
 export const ChatSidebar = ({ chatId }) => {
   const [chatList, setChatList] = useState([]);
@@ -58,9 +60,26 @@ export const ChatSidebar = ({ chatId }) => {
 
 export const getServerSideProps = async (ctx) => {
   const chatId = ctx.params?.chatId?.[0] || null;
+  if (chatId) {
+    const { user } = await getSession(ctx.req, ctx.res);
+    const client = await clientPromise;
+    const db = client.db("FofoDB");
+    const chat = await db.collection("chats").findOne({
+      userId: user.sub,
+      _id: new ObjectId(chatId),
+    });
+    return {
+      props: {
+        chatId,
+        title: chat.title,
+        messages: chat.messages.map((message) => ({
+          ...message,
+          _id: uuid(),
+        })),
+      },
+    };
+  }
   return {
-    props: {
-      chatId,
-    },
+    props: {},
   };
 };

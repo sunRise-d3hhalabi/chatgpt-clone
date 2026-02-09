@@ -6,7 +6,8 @@ import { v4 as uuid } from "uuid";
 import { Message } from "components/Message";
 import { useRouter } from "next/router";
 
-export default function ChatPage({ chatId }) {
+export default function ChatPage({ chatId, title, messages }) {
+  console.log("props: ", title, messages);
   const [messageText, setMessageText] = useState("");
   const [incomingMessage, setIncomingMessage] = useState("");
   const [newChatMessages, setNewChatMessages] = useState([]);
