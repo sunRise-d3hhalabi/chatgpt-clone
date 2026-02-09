@@ -25,6 +25,7 @@ export default async function handler(req) {
           model: "gpt-4.1-nano",
           messages: [initialChatMessage, { content: message, role: "user" }],
           stream: true,
+          temperature: 0.7,
         }),
       }
     );
