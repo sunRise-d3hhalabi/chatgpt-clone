@@ -1,19 +1,30 @@
 import Head from "next/head";
 import { ChatSidebar } from "components/ChatSidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { streamReader } from "openai-edge-stream";
 import { v4 as uuid } from "uuid";
 import { Message } from "components/Message";
+import { useRouter } from "next/router";
 
 export default function ChatPage() {
   const [messageText, setMessageText] = useState("");
   const [incomingMessage, setIncomingMessage] = useState("");
   const [newChatMessages, setNewChatMessages] = useState([]);
   const [generatingResponse, setGeneratingResponse] = useState(false);
+  const [newChatId, setNewChatId] = useState(null);
+  const router = useRouter();
+
+  // if we've created a new chat
+  useEffect(() => {
+    if (!generatingResponse && newChatId) {
+      setNewChatId(null);
+      router.push(`/chat/${newChatId}`);
+    }
+  }, [newChatId, generatingResponse]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log("Message text: ", messageText);
+    console.log("Message text: ", messageText);
     setGeneratingResponse(true);
     setNewChatMessages((prev) => {
       const newChatMessages = [
@@ -44,8 +55,12 @@ export default function ChatPage() {
 
     const reader = data.getReader();
     await streamReader(reader, (message) => {
-      // console.log("MESSAGE: ", message);
-      setIncomingMessage((s) => `${s}${message.content}`);
+      console.log("MESSAGE: ", message);
+      if (message.event === "newChatId") {
+        setNewChatId(message.content);
+      } else {
+        setIncomingMessage((s) => `${s}${message.content}`);
+      }
     });
 
     setGeneratingResponse(false);
@@ -58,8 +73,8 @@ export default function ChatPage() {
       </Head>
       <div className="grid h-screen grid-cols-[260px_1fr]">
         <ChatSidebar />
-        <div className="flex flex-col bg-gray-700">
-          <div className="flex-1 text-white">
+        <div className="flex flex-col overflow-hidden bg-gray-700">
+          <div className="flex flex-1 flex-col-reverse overflow-scroll text-white">
             {newChatMessages.map((message) => (
               <Message
                 key={message._id}
